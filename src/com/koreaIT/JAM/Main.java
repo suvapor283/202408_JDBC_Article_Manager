@@ -1,5 +1,9 @@
 package com.koreaIT.JAM;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -16,6 +20,10 @@ public class Main {
 		int lastArticleId = 0;
 		List<Article> articles = new ArrayList<>();
 		
+		String url = "jdbc:mysql://localhost:3306/2024_08_JAM";
+        String username = "root";
+        String password = "";
+		
 		while (true) {
 			System.out.printf("명령어 ) ");
 			String cmd = sc.nextLine().trim();
@@ -30,10 +38,45 @@ public class Main {
 			}
 			
 			if (cmd.equals("article write")) {
+				
+				Connection conn = null;
+		        PreparedStatement pstmt = null;
+		        
 				System.out.printf("제목 : ");
 				String title = sc.nextLine().trim();
 				System.out.printf("내용 : ");
 				String body = sc.nextLine().trim();
+				
+				try {
+		            conn = DriverManager.getConnection(url, username, password);
+		            
+		            String sql = "INSERT INTO article";
+		            sql += " regDate = NOW()";
+		            sql += ", updateDate = NOW()";
+		            sql += ", title = '" + title + "'";
+		            sql += ", `body` = '" + body + "';";
+		            
+		            pstmt = conn.prepareStatement(sql);
+		            pstmt.executeUpdate();
+
+		        } catch (SQLException e) {
+		            e.printStackTrace();
+		        } finally {
+		            if (pstmt != null) {
+		                try {
+		                	pstmt.close();
+		                } catch (SQLException e) {
+		                    e.printStackTrace();
+		                }
+		            }
+		            if (conn != null) {
+		                try {
+		                    conn.close();
+		                } catch (SQLException e) {
+		                    e.printStackTrace();
+		                }
+		            }
+		        }
 				
 				articles.add(new Article(++lastArticleId, title, body));
 				System.out.printf("%d번 게시물이 작성되었습니다.\n", lastArticleId);
