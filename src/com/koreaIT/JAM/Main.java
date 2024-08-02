@@ -20,7 +20,7 @@ public class Main {
 		int lastArticleId = 0;
 		List<Article> articles = new ArrayList<>();
 		
-		String url = "jdbc:mysql://localhost:3306/2024_08_JAM";
+		String url = "jdbc:mysql://localhost:3306/2024_08_JAM?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull";
         String username = "root";
         String password = "";
 		
@@ -38,20 +38,20 @@ public class Main {
 			}
 			
 			if (cmd.equals("article write")) {
-				
-				Connection conn = null;
-		        PreparedStatement pstmt = null;
 		        
 				System.out.printf("제목 : ");
 				String title = sc.nextLine().trim();
 				System.out.printf("내용 : ");
 				String body = sc.nextLine().trim();
 				
+				Connection conn = null;
+		        PreparedStatement pstmt = null;
+				
 				try {
 		            conn = DriverManager.getConnection(url, username, password);
 		            
 		            String sql = "INSERT INTO article";
-		            sql += " regDate = NOW()";
+		            sql += " SET regDate = NOW()";
 		            sql += ", updateDate = NOW()";
 		            sql += ", title = '" + title + "'";
 		            sql += ", `body` = '" + body + "';";
