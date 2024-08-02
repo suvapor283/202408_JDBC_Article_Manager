@@ -78,7 +78,7 @@ public class Main {
 		            }
 		        }
 				
-				articles.add(new Article(++lastArticleId, title, body));
+//				articles.add(new Article(++lastArticleId, title, body));
 				System.out.printf("%d번 게시물이 작성되었습니다.\n", lastArticleId);
 			}
 			
