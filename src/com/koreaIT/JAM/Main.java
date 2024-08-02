@@ -24,6 +24,7 @@ public class Main {
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
 		try {
 			conn = DriverManager.getConnection(url, username, password);
@@ -65,7 +66,6 @@ public class Main {
 				}
 
 				else if (cmd.equals("article list")) {
-					ResultSet rs = null;
 					List<Article> articles = new ArrayList<>();
 
 					try {
@@ -89,7 +89,7 @@ public class Main {
 
 			        } catch (SQLException e) {
 			            e.printStackTrace();
-			            }
+			        }
 			
 					if (articles.isEmpty()) {
 						System.out.println("게시물이 존재하지 않습니다.");
@@ -102,6 +102,50 @@ public class Main {
 								article.getUpdateDate());
 					}
 				}
+				
+				else if (cmd.startsWith("article modify ")) {
+					try {
+						int id = Integer.parseInt(cmd.split(" ")[2]);
+						
+			            String sql = "SELECT * FROM article";
+			            sql += " WHERE id = " + id + ";";
+			            
+			            pstmt = conn.prepareStatement(sql);
+			            rs = pstmt.executeQuery();
+			            
+			            Article article =null;
+			            
+			            while (rs.next()) {
+			            	article = new Article(rs.getInt("id"), rs.getString("regDate"), rs.getString("updateDate"), rs.getString("title"), rs.getString("body"));
+			            }
+			            
+			            if (article == null) {
+			            	System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
+			            	continue;
+			            }
+			            
+			            System.out.printf("수정할 제목 : ");
+						String title = sc.nextLine().trim();
+						System.out.printf("수정할 내용 : ");
+						String body = sc.nextLine().trim();
+						
+						sql = "UPDATE article";
+						sql += " SET updateDate = NOW()";
+						sql += ", title = '" + title + "'";
+						sql += ", `body` = '" + body + "'";
+						sql += " WHERE id = " + id + ";";
+						
+						pstmt = conn.prepareStatement(sql);
+						pstmt.executeUpdate();
+						
+						System.out.printf("%d번 게시물이 수정되었습니다.\n", id);
+			            
+			        } catch (NumberFormatException e) {
+						System.out.println("명령어를 올바르게 입력해주세요.");
+					} catch (SQLException e) {
+			            e.printStackTrace();
+			        } 
+				}
 
 				else {
 					System.out.println("존재하지 않는 명령어입니다.");
@@ -112,6 +156,13 @@ public class Main {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
 			if (pstmt != null) {
 				try {
 					pstmt.close();
