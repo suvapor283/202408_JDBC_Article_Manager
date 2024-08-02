@@ -3,9 +3,14 @@ package com.koreaIT.JAM.test;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class JDBCInsertTest {
+import com.koreaIT.JAM.dto.Article;
+
+public class JDBCSelectTest {
     public static void main(String[] args) {
     	String url = "jdbc:mysql://localhost:3306/2024_08_JAM?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull";
         String username = "root";
@@ -13,22 +18,41 @@ public class JDBCInsertTest {
 
         Connection conn = null;
         PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        
+        List<Article> articles = new ArrayList<>();
         
         try {
             conn = DriverManager.getConnection(url, username, password);
             
-            String sql = "INSERT INTO article";
-            sql += " regDate = NOW()";
-            sql += ", updateDate = NOW()";
-            sql += ", title = '제목'";
-            sql += ", `body` = '내용';";
+            String sql = "SELECT * FROM article";
+            sql += " ORDER BY id DESC;";
             
             pstmt = conn.prepareStatement(sql);
-            pstmt.executeUpdate();
+            rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+            	int id = rs.getInt("id");
+            	String regDate = rs.getString("regDate");
+            	String updateDate = rs.getString("updateDate");
+            	String title = rs.getString("title");
+            	String body = rs.getString("body");
+            	
+            	Article article = new Article(id, regDate, updateDate, title, body);
+            	
+            	articles.add(article);
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
+        	if (rs != null) {
+                try {
+                	rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
             if (pstmt != null) {
                 try {
                 	pstmt.close();
