@@ -10,5 +10,27 @@ CREATE TABLE article(
     , `body` TEXT NOT NULL
 );
 
+# ------------------------------------------------
+
+# article write
+INSERT INTO article
+    SET regDate = NOW()
+        , updateDate = NOW()
+        , title = ''
+        , `body` = '';
+
+# article list   
 SELECT *
-    FROM article;
+    FROM article
+    ORDER BY id DESC;
+    
+# article delete
+DELETE FROM article
+    WHERE id = 0;
+    
+# article modify
+UPDATE article
+    SET updateDate = NOW()
+        , title = ''
+        , `body` = ''
+    WHERE id = 1;

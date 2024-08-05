@@ -103,6 +103,40 @@ public class Main {
 					}
 				}
 				
+				else if (cmd.startsWith("article detail ")) {
+					try {
+						int id = Integer.parseInt(cmd.split(" ")[2]);
+						
+			            String sql = "SELECT * FROM article";
+			            sql += " WHERE id = " + id + ";";
+			            
+			            pstmt = conn.prepareStatement(sql);
+			            rs = pstmt.executeQuery();
+			            
+			            Article article = null;
+			            
+			            while (rs.next()) {
+			            	article = new Article(rs.getInt("id"), rs.getString("regDate"), rs.getString("updateDate"), rs.getString("title"), rs.getString("body"));
+			            }
+			            
+			            if (article == null) {
+			            	System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
+			            	continue;
+			            }
+			            
+			            System.out.printf("번호 : %d\n", article.getId());
+			            System.out.printf("작성일 : %s\n", article.getRegDate());
+			            System.out.printf("수정일 : %s\n", article.getUpdateDate());
+			            System.out.printf("제목 : %s\n", article.getTitle());
+			            System.out.printf("내용 : %s\n", article.getBody());
+			            
+			        } catch (NumberFormatException e) {
+						System.out.println("명령어를 올바르게 입력해주세요.");
+					} catch (SQLException e) {
+			            e.printStackTrace();
+			        } 
+				}
+				
 				else if (cmd.startsWith("article modify ")) {
 					try {
 						int id = Integer.parseInt(cmd.split(" ")[2]);
@@ -145,6 +179,42 @@ public class Main {
 					} catch (SQLException e) {
 			            e.printStackTrace();
 			        } 
+				}
+				
+				else if (cmd.startsWith("article delete ")) {
+					try {
+						int id = Integer.parseInt(cmd.split(" ")[2]);
+						
+			            String sql = "SELECT * FROM article";
+			            sql += " WHERE id = " + id + ";";
+			            
+			            pstmt = conn.prepareStatement(sql);
+			            rs = pstmt.executeQuery();
+			            
+			            Article article =null;
+			            
+			            while (rs.next()) {
+			            	article = new Article(rs.getInt("id"), rs.getString("regDate"), rs.getString("updateDate"), rs.getString("title"), rs.getString("body"));
+			            }
+			            
+			            if (article == null) {
+			            	System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
+			            	continue;
+			            }
+						
+						sql = "DELETE FROM article";
+						sql += " WHERE id =" + id + ";";
+						
+						pstmt = conn.prepareStatement(sql);
+						pstmt.executeUpdate();
+						
+						System.out.printf("%d번 게시물이 삭제되었습니다.\n", id);
+			            
+			        } catch (NumberFormatException e) {
+						System.out.println("명령어를 올바르게 입력해주세요.");
+					} catch (SQLException e) {
+			            e.printStackTrace();
+			        }
 				}
 
 				else {
