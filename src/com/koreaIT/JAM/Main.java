@@ -221,6 +221,7 @@ public class Main {
 					System.out.println("존재하지 않는 명령어입니다.");
 				}
 			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -233,6 +234,7 @@ public class Main {
 					e.printStackTrace();
 				}
 			}
+			
 			if (pstmt != null) {
 				try {
 					pstmt.close();
@@ -240,6 +242,7 @@ public class Main {
 					e.printStackTrace();
 				}
 			}
+			
 			if (conn != null) {
 				try {
 					conn.close();
