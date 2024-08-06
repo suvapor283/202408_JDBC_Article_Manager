@@ -3,8 +3,6 @@ package com.koreaIT.JAM;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -81,42 +79,37 @@ public class Main {
 
 					System.out.println("번호	|	제목	|	작성일");
 					for (Article article : articles) {
-						System.out.printf("%d	|	%s	|	%s\n", article.getId(), article.getTitle(), article.getUpdateDate());
+						System.out.printf("%d	|	%s	|	%s\n", article.getId(), article.getTitle(),article.getUpdateDate());
 					}
 				}
 
 				else if (cmd.startsWith("article detail ")) {
+					int id = -1;
+							
 					try {
-						int id = Integer.parseInt(cmd.split(" ")[2]);
-
-						SecSql sql = new SecSql();
-						sql.append("SELECT * FROM article");
-						sql.append("WHERE id = ?", id);
-
-						Map<String, Object> articleMap = DBUtil.selectRow(conn, sql);
-						
-						if (articleMap.isEmpty()) {
-							System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
-							continue;
-						}
-						
-						id = (int) articleMap.get("id");
-						String regDate = (String) ((LocalDateTime) articleMap.get("regDate")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-						String updateDate = (String) ((LocalDateTime) articleMap.get("updateDate")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-						String title = (String) articleMap.get("title");
-						String body = (String) articleMap.get("body");
-
-						Article article = new Article(id, regDate, updateDate, title, body);
-
-						System.out.printf("번호 : %d\n", article.getId());
-						System.out.printf("작성일 : %s\n", article.getRegDate());
-						System.out.printf("수정일 : %s\n", article.getUpdateDate());
-						System.out.printf("제목 : %s\n", article.getTitle());
-						System.out.printf("내용 : %s\n", article.getBody());
-						
+						id = Integer.parseInt(cmd.split(" ")[2]);
 					} catch (NumberFormatException e) {
 						System.out.println("명령어를 올바르게 입력해주세요.");
+						continue;
 					}
+
+					SecSql sql = new SecSql();
+					sql.append("SELECT * FROM article");
+					sql.append("WHERE id = ?", id);
+
+					Map<String, Object> articleMap = DBUtil.selectRow(conn, sql);
+
+					if (articleMap.isEmpty()) {
+						System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
+						continue;
+					}
+
+					System.out.printf("번호 : %d\n", articleMap.get("id"));
+					System.out.printf("작성일 : %s\n", articleMap.get("regDate"));
+					System.out.printf("수정일 : %s\n", articleMap.get("updateDate"));
+					System.out.printf("제목 : %s\n", articleMap.get("title"));
+					System.out.printf("내용 : %s\n", articleMap.get("body"));
+
 				}
 
 				else if (cmd.startsWith("article modify ")) {
@@ -128,7 +121,7 @@ public class Main {
 						sql.append("WHERE id = ?", id);
 
 						Map<String, Object> articleMap = DBUtil.selectRow(conn, sql);
-						
+
 						if (articleMap.size() == 0) {
 							System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
 							continue;
@@ -144,7 +137,7 @@ public class Main {
 						sql.append("SET title = ?", title);
 						sql.append(", `body` = ?", body);
 						sql.append("WHERE id = ?", id);
-						
+
 						DBUtil.update(conn, sql);
 
 						System.out.printf("%d번 게시물이 수정되었습니다.\n", id);
@@ -163,16 +156,16 @@ public class Main {
 						sql.append("WHERE id = ?", id);
 
 						Map<String, Object> articleMap = DBUtil.selectRow(conn, sql);
-						
+
 						if (articleMap.size() == 0) {
 							System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
 							continue;
 						}
-						
+
 						sql = new SecSql();
 						sql.append("DELETE FROM article");
 						sql.append("WHERE id = ?", id);
-						
+
 						DBUtil.delete(conn, sql);
 
 						System.out.printf("%d번 게시물이 삭제되었습니다.\n", id);
