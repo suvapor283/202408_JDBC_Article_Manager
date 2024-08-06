@@ -85,7 +85,7 @@ public class Main {
 
 				else if (cmd.startsWith("article detail ")) {
 					int id = -1;
-							
+
 					try {
 						id = Integer.parseInt(cmd.split(" ")[2]);
 					} catch (NumberFormatException e) {
@@ -111,69 +111,70 @@ public class Main {
 					System.out.printf("내용 : %s\n", articleMap.get("body"));
 
 				}
-				
+
 				else if (cmd.startsWith("article modify ")) {
 					int id = -1;
-					
+
 					try {
 						id = Integer.parseInt(cmd.split(" ")[2]);
 					} catch (NumberFormatException e) {
 						System.out.println("명령어를 올바르게 입력해주세요.");
 					}
 
-						SecSql sql = new SecSql();
-						sql.append("SELECT COUNT(id) FROM article");
-						sql.append("WHERE id = ?", id);
-						
-						int articleCnt = DBUtil.selectRowIntValue(conn, sql);
+					SecSql sql = new SecSql();
+					sql.append("SELECT COUNT(id) FROM article");
+					sql.append("WHERE id = ?", id);
 
-						if (articleCnt == 0) {
-							System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
-							continue;
-						}
+					int articleCnt = DBUtil.selectRowIntValue(conn, sql);
 
-						System.out.printf("수정할 제목 : ");
-						String title = sc.nextLine().trim();
-						System.out.printf("수정할 내용 : ");
-						String body = sc.nextLine().trim();
+					if (articleCnt == 0) {
+						System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
+						continue;
+					}
 
-						sql = new SecSql();
-						sql.append("UPDATE article");
-						sql.append("SET title = ?", title);
-						sql.append(", `body` = ?", body);
-						sql.append("WHERE id = ?", id);
+					System.out.printf("수정할 제목 : ");
+					String title = sc.nextLine().trim();
+					System.out.printf("수정할 내용 : ");
+					String body = sc.nextLine().trim();
 
-						DBUtil.update(conn, sql);
+					sql = new SecSql();
+					sql.append("UPDATE article");
+					sql.append("SET title = ?", title);
+					sql.append(", `body` = ?", body);
+					sql.append("WHERE id = ?", id);
 
-						System.out.printf("%d번 게시물이 수정되었습니다.\n", id);
+					DBUtil.update(conn, sql);
+
+					System.out.printf("%d번 게시물이 수정되었습니다.\n", id);
 				}
 
 				else if (cmd.startsWith("article delete ")) {
+					int id = -1;
+
 					try {
-						int id = Integer.parseInt(cmd.split(" ")[2]);
-
-						SecSql sql = new SecSql();
-						sql.append("SELECT * FROM article");
-						sql.append("WHERE id = ?", id);
-
-						Map<String, Object> articleMap = DBUtil.selectRow(conn, sql);
-
-						if (articleMap.size() == 0) {
-							System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
-							continue;
-						}
-
-						sql = new SecSql();
-						sql.append("DELETE FROM article");
-						sql.append("WHERE id = ?", id);
-
-						DBUtil.delete(conn, sql);
-
-						System.out.printf("%d번 게시물이 삭제되었습니다.\n", id);
-
+						id = Integer.parseInt(cmd.split(" ")[2]);
 					} catch (NumberFormatException e) {
 						System.out.println("명령어를 올바르게 입력해주세요.");
 					}
+
+					SecSql sql = new SecSql();
+					sql.append("SELECT COUNT(id) FROM article");
+					sql.append("WHERE id = ?", id);
+
+					int articleCnt = DBUtil.selectRowIntValue(conn, sql);
+
+					if (articleCnt == 0) {
+						System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
+						continue;
+					}
+
+					sql = new SecSql();
+					sql.append("DELETE FROM article");
+					sql.append("WHERE id = ?", id);
+
+					DBUtil.delete(conn, sql);
+
+					System.out.printf("%d번 게시물이 삭제되었습니다.\n", id);
 				}
 
 				else {
