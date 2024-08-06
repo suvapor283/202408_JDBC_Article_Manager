@@ -111,18 +111,23 @@ public class Main {
 					System.out.printf("내용 : %s\n", articleMap.get("body"));
 
 				}
-
+				
 				else if (cmd.startsWith("article modify ")) {
+					int id = -1;
+					
 					try {
-						int id = Integer.parseInt(cmd.split(" ")[2]);
+						id = Integer.parseInt(cmd.split(" ")[2]);
+					} catch (NumberFormatException e) {
+						System.out.println("명령어를 올바르게 입력해주세요.");
+					}
 
 						SecSql sql = new SecSql();
-						sql.append("SELECT * FROM article");
+						sql.append("SELECT COUNT(id) FROM article");
 						sql.append("WHERE id = ?", id);
+						
+						int articleCnt = DBUtil.selectRowIntValue(conn, sql);
 
-						Map<String, Object> articleMap = DBUtil.selectRow(conn, sql);
-
-						if (articleMap.size() == 0) {
+						if (articleCnt == 0) {
 							System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
 							continue;
 						}
@@ -141,10 +146,6 @@ public class Main {
 						DBUtil.update(conn, sql);
 
 						System.out.printf("%d번 게시물이 수정되었습니다.\n", id);
-
-					} catch (NumberFormatException e) {
-						System.out.println("명령어를 올바르게 입력해주세요.");
-					}
 				}
 
 				else if (cmd.startsWith("article delete ")) {
