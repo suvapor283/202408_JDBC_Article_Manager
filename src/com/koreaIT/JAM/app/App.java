@@ -3,14 +3,10 @@ package com.koreaIT.JAM.app;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
-import com.koreaIT.JAM.dto.Article;
-import com.koreaIT.JAM.util.DBUtil;
-import com.koreaIT.JAM.util.SecSql;
+import com.koreaIT.JAM.controller.ArticleController;
+import com.koreaIT.JAM.controller.MemberController;
 
 public class App {
 	private final String url = "jdbc:mysql://localhost:3306/2024_08_JAM?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull";
@@ -26,6 +22,9 @@ public class App {
 
 		try {
 			conn = DriverManager.getConnection(url, username, password);
+			
+			MemberController memberController = new MemberController(sc, conn);
+			ArticleController articleController = new ArticleController(sc, conn);
 
 			while (true) {
 				System.out.printf("명령어 ) ");
@@ -41,239 +40,31 @@ public class App {
 				}
 				
 				if (cmd.equals("member join")) {
-					String loginId = null;
-					String loginPw = null;
-					String name = null;
-					
-					while (true) {
-						System.out.printf("아이디 : ");
-						loginId = sc.nextLine().trim();
-						
-						if (loginId.isEmpty()) {
-							System.out.println("아이디는 필수 입력 정보입니다.");
-							continue;
-						}
-
-						SecSql sql = new SecSql();
-						sql.append("SELECT COUNT(id) FROM `member`");
-						sql.append("WHERE loginId = ?", loginId);
-						
-						int isLoginDup = DBUtil.selectRowIntValue(conn, sql);
-
-						if (isLoginDup == 1) {
-							System.out.println("이미 존재하는 아이디입니다.");
-							continue;
-						}
-						
-						System.out.printf("[ %s ] 는 사용가능한 아이디입니다.\n", loginId);
-				
-						break;
-					}
-					
-					while (true) {
-						System.out.printf("비밀번호 : ");
-						loginPw = sc.nextLine().trim();
-						
-						if (loginPw.isEmpty()) {
-							System.out.println("비밀번호는 필수 입력 정보입니다.");
-							continue;
-						}
-						
-						System.out.printf("비밀번호 확인 : ");
-						String loginPwChk = sc.nextLine().trim();
-
-						if (loginPw.equals(loginPwChk) == false) {
-							System.out.println("비밀번호를 확인해주세요.");
-							continue;
-						}
-						
-						break;
-					}
-					
-					while (true) {
-						System.out.printf("이름 : ");
-						name = sc.nextLine().trim();
-						
-						if (name.isEmpty()) {
-							System.out.println("이름은 필수 입력 정보입니다.");
-							continue;
-						}
-						
-						break;
-					}	
-					
-					SecSql sql = new SecSql();
-					sql.append("INSERT INTO `member`");
-					sql.append("SET regDate = NOW()");
-					sql.append(", updateDate = NOW()");
-					sql.append(", loginId = ?", loginId);
-					sql.append(", loginPw = ?", loginPw);
-					sql.append(", `name` = ?", name);
-					
-					DBUtil.insert(conn, sql);
-					
-					System.out.printf("[ %s ] 님 회원가입을 축하합니다.\n", name);
+					memberController.doJoin();
 				}
 				
-				else if (cmd.equals("member login")) {
-					System.out.printf("아이디 : ");
-					String loginId = sc.nextLine().trim();
-					System.out.printf("비밀번호 : ");
-					String loginPw = sc.nextLine().trim();
-					
-					SecSql sql = new SecSql();
-					sql.append("SELECT * FROM `member`");
-					sql.append("WHERE loginId = ?", loginId);
-					
-					Map<String, Object> memberMap = DBUtil.selectRow(conn, sql);
-					
-					if (memberMap.isEmpty()) {
-						System.out.println("아이디가 일치하지 않습니다.");
-						continue;
-					}
-					
-					if (loginPw.equals(memberMap.get("loginPw"))) {
-						System.out.println("비밀번호가 일치하지 않습니다.");
-						continue;
-					}
-					
-					System.out.printf("%s님 환영합니다.\n", loginId);
-				}
+//				else if (cmd.equals("member login")) {
+//					memberController.doLogin();
+//				}
 
 				else if (cmd.equals("article write")) {
-					System.out.printf("제목 : ");
-					String title = sc.nextLine().trim();
-					System.out.printf("내용 : ");
-					String body = sc.nextLine().trim();
-
-					SecSql sql = new SecSql();
-					sql.append("INSERT INTO article");
-					sql.append("SET regDate = NOW()");
-					sql.append(", updateDate = NOW()");
-					sql.append(", title = ?", title);
-					sql.append(", `body` = ?", body);
-
-					int id = DBUtil.insert(conn, sql);
-
-					System.out.printf("%d번 게시물이 작성되었습니다.\n", id);
+					articleController.doWrite();
 				}
 
 				else if (cmd.equals("article list")) {
-					List<Article> articles = new ArrayList<>();
-
-					SecSql sql = new SecSql();
-					sql.append("SELECT * FROM article");
-					sql.append("ORDER BY id DESC");
-
-					List<Map<String, Object>> articleListMap = DBUtil.selectRows(conn, sql);
-
-					for (Map<String, Object> articleMap : articleListMap) {
-						articles.add(new Article(articleMap));
-					}
-
-					if (articles.isEmpty()) {
-						System.out.println("게시물이 존재하지 않습니다.");
-						continue;
-					}
-
-					System.out.println("번호	|	제목	|	작성일");
-					for (Article article : articles) {
-						System.out.printf("%d	|	%s	|	%s\n", article.getId(), article.getTitle(),article.getUpdateDate());
-					}
+					articleController.showList();
 				}
 
 				else if (cmd.startsWith("article detail ")) {
-					int id = -1;
-
-					try {
-						id = Integer.parseInt(cmd.split(" ")[2]);
-					} catch (NumberFormatException e) {
-						System.out.println("명령어를 올바르게 입력해주세요.");
-						continue;
-					}
-
-					SecSql sql = new SecSql();
-					sql.append("SELECT * FROM article");
-					sql.append("WHERE id = ?", id);
-
-					Map<String, Object> articleMap = DBUtil.selectRow(conn, sql);
-
-					if (articleMap.isEmpty()) {
-						System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
-						continue;
-					}
-
-					System.out.printf("번호 : %d\n", articleMap.get("id"));
-					System.out.printf("작성일 : %s\n", articleMap.get("regDate"));
-					System.out.printf("수정일 : %s\n", articleMap.get("updateDate"));
-					System.out.printf("제목 : %s\n", articleMap.get("title"));
-					System.out.printf("내용 : %s\n", articleMap.get("body"));
-
+					articleController.showDetail(cmd);
 				}
 
 				else if (cmd.startsWith("article modify ")) {
-					int id = -1;
-
-					try {
-						id = Integer.parseInt(cmd.split(" ")[2]);
-					} catch (NumberFormatException e) {
-						System.out.println("명령어를 올바르게 입력해주세요.");
-					}
-
-					SecSql sql = new SecSql();
-					sql.append("SELECT COUNT(id) FROM article");
-					sql.append("WHERE id = ?", id);
-
-					int isExists = DBUtil.selectRowIntValue(conn, sql);
-
-					if (isExists == 0) {
-						System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
-						continue;
-					}
-
-					System.out.printf("수정할 제목 : ");
-					String title = sc.nextLine().trim();
-					System.out.printf("수정할 내용 : ");
-					String body = sc.nextLine().trim();
-
-					sql = new SecSql();
-					sql.append("UPDATE article");
-					sql.append("SET title = ?", title);
-					sql.append(", `body` = ?", body);
-					sql.append("WHERE id = ?", id);
-
-					DBUtil.update(conn, sql);
-
-					System.out.printf("%d번 게시물이 수정되었습니다.\n", id);
+					articleController.doModify(cmd);
 				}
 
 				else if (cmd.startsWith("article delete ")) {
-					int id = -1;
-
-					try {
-						id = Integer.parseInt(cmd.split(" ")[2]);
-					} catch (NumberFormatException e) {
-						System.out.println("명령어를 올바르게 입력해주세요.");
-					}
-
-					SecSql sql = new SecSql();
-					sql.append("SELECT COUNT(id) FROM article");
-					sql.append("WHERE id = ?", id);
-
-					int isExists = DBUtil.selectRowIntValue(conn, sql);
-
-					if (isExists == 0) {
-						System.out.printf("%d번 게시물이 존재하지 않습니다.\n", id);
-						continue;
-					}
-
-					sql = new SecSql();
-					sql.append("DELETE FROM article");
-					sql.append("WHERE id = ?", id);
-
-					DBUtil.delete(conn, sql);
-
-					System.out.printf("%d번 게시물이 삭제되었습니다.\n", id);
+					articleController.doDelete(cmd);
 				}
 
 				else {
