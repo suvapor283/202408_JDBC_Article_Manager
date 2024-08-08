@@ -8,13 +8,13 @@ import com.koreaIT.JAM.util.DBUtil;
 import com.koreaIT.JAM.util.SecSql;
 
 public class ArticleDao {
-	Connection conn;
+	private Connection conn;
 
 	public ArticleDao(Connection conn) {
 		this.conn = conn;
 	}
 
-	public int doWrite(String title, String body) {
+	public int writeArticle(String title, String body) {
 		SecSql sql = new SecSql();
 		sql.append("INSERT INTO article");
 		sql.append("SET regDate = NOW()");
@@ -25,7 +25,7 @@ public class ArticleDao {
 		return DBUtil.insert(conn, sql);
 	}
 
-	public List<Map<String, Object>> showList() {
+	public List<Map<String, Object>> getArticles() {
 		SecSql sql = new SecSql();
 		sql.append("SELECT * FROM article");
 		sql.append("ORDER BY id DESC");
@@ -33,7 +33,7 @@ public class ArticleDao {
 		return DBUtil.selectRows(conn, sql);
 	}
 
-	public Map<String, Object> showDetail(int id) {
+	public Map<String, Object> getArticle(int id) {
 		SecSql sql = new SecSql();
 		sql.append("SELECT * FROM article");
 		sql.append("WHERE id = ?", id);
@@ -41,7 +41,7 @@ public class ArticleDao {
 		return DBUtil.selectRow(conn, sql);
 	}
 	
-	public void doModify(int id, String title, String body) {
+	public void modifyArticle(int id, String title, String body) {
 		SecSql sql = new SecSql();
 		sql.append("UPDATE article");
 		sql.append("SET title = ?", title);
@@ -51,7 +51,7 @@ public class ArticleDao {
 		DBUtil.update(conn, sql);
 	}
 	
-	public void doDelete(int id) {
+	public void deleteArticle(int id) {
 		SecSql sql = new SecSql();
 		sql.append("DELETE FROM article");
 		sql.append("WHERE id = ?", id);
