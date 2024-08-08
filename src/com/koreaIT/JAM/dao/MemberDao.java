@@ -6,13 +6,13 @@ import com.koreaIT.JAM.util.DBUtil;
 import com.koreaIT.JAM.util.SecSql;
 
 public class MemberDao {
-	Connection conn;
+	private Connection conn;
 
 	public MemberDao(Connection conn) {
 		this.conn = conn;
 	}
 	
-	public void doJoin(String loginId, String loginPw, String name) {
+	public void joinMember(String loginId, String loginPw, String name) {
 		SecSql sql = new SecSql();
 		sql.append("INSERT INTO `member`");
 		sql.append("SET regDate = NOW()");
@@ -24,7 +24,7 @@ public class MemberDao {
 		DBUtil.insert(conn, sql);
 	}
 
-	public int isLoginDup(String loginId) {
+	public int isLoginIdDup(String loginId) {
 		SecSql sql = new SecSql();
 		sql.append("SELECT COUNT(id) FROM `member`");
 		sql.append("WHERE loginId = ?", loginId);

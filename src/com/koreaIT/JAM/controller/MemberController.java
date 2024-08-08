@@ -3,15 +3,15 @@ package com.koreaIT.JAM.controller;
 import java.sql.Connection;
 import java.util.Scanner;
 
-import com.koreaIT.JAM.dao.MemberDao;
+import com.koreaIT.JAM.service.MemberService;
 
 public class MemberController {
 	private Scanner sc;
-	private MemberDao memberDao;
+	private MemberService memberservice;
 
 	public MemberController(Scanner sc, Connection conn) {
 		this.sc = sc;
-		this.memberDao = new MemberDao(conn);
+		this.memberservice = new MemberService(conn);
 	}
 
 	public void doJoin() {
@@ -28,7 +28,7 @@ public class MemberController {
 				continue;
 			}
 
-			int isLoginDup = memberDao.isLoginDup(loginId);
+			int isLoginDup = memberservice.isLoginIdDup(loginId);
 
 			if (isLoginDup == 1) {
 				System.out.println("이미 존재하는 아이디입니다.");
@@ -72,7 +72,7 @@ public class MemberController {
 			break;
 		}	
 		
-		memberDao.doJoin(loginId, loginPw, name);
+		memberservice.joinMember(loginId, loginPw, name);
 		
 		System.out.printf("[ %s ] 님 회원가입을 축하합니다.\n", name);
 	}
@@ -99,6 +99,9 @@ public class MemberController {
 //			continue;
 //		}
 //		
+//		HttpSession session = request.getSession();
+//		session.setAttribute("user", memberMap);
+//	
 //		System.out.printf("%s님 환영합니다.\n", loginId);	
 //	}
 }
