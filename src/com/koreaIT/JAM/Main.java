@@ -7,3 +7,5 @@ public class Main {
 		new App().run();
 	}
 }
+
+// JDBC_Article_Manager 완료
